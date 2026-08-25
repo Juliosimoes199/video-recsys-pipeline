@@ -1,5 +1,8 @@
 # Video RecSys Pipeline
 
+[![Avaliar modelo de retrieval](https://github.com/Juliosimoes199/video-recsys-pipeline/actions/workflows/avaliar-modelo.yml/badge.svg)](https://github.com/Juliosimoes199/video-recsys-pipeline/actions/workflows/avaliar-modelo.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Pipeline de ponta a ponta de um sistema de recomendação de vídeos curtos:
 coleta de dados, compreensão multimodal, embeddings de vídeo, um modelo de
 retrieval de duas torres, e uma infraestrutura de streaming adaptativo real
@@ -65,7 +68,17 @@ adapta em tempo real por similaridade de embeddings de vídeo.
   modelo do Estágio 2 com sinal de verdade.
 - `video-service` (Estágio 3) ainda não valida a assinatura do webhook do
   Clerk — funcional, mas não hardened pra produção real.
-- Sem testes automatizados nem CI ainda.
+- Sem testes automatizados no Estágio 1/3 ainda — o único CI hoje é a
+  avaliação automática de modelos de retrieval (ver "Contribuindo").
+
+## Contribuindo
+
+Este projeto é open source e está aberto a contribuições — de correções
+pequenas a propostas de modelos de retrieval novos, especialmente de
+outros devs do mercado angolano. Toda proposta de modelo novo é validada
+automaticamente por CI (Recall@10/NDCG@10 contra a versão em produção,
+sem intervenção manual) antes de qualquer decisão de promoção — ver
+[`CONTRIBUTING.md`](CONTRIBUTING.md) pro fluxo completo.
 
 ## Como rodar
 

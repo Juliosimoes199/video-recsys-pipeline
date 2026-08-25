@@ -1,0 +1,70 @@
+name: Avaliar modelo de retrieval
+
+# Roda automaticamente quando um PR propõe uma versão nova do modelo
+# (arquivos novos em 02-embeddings-retrieval/models/two_tower/). Compara
+# Recall@10/NDCG@10 contra a versão que está marcada como "current" no
+# registro, e publica o resultado no resumo do job — a promoção em si
+# continua manual (scripts/promover_modelo.py), isso aqui só dá o sinal
+# objetivo pra quem for revisar o PR.
+
+on:
+  pull_request:
+    paths:
+      - "02-embeddings-retrieval/models/**"
+      - "02-embeddings-retrieval/data/interacoes.csv"
+
+jobs:
+  avaliar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências (só o necessário pra avaliação)
+        run: pip install pandas numpy tensorflow
+
+      - name: Descobrir versões de modelo novas neste PR
+        id: versoes
+        run: |
+          NOVAS=$(git diff --name-only --diff-filter=A \
+            "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}" \
+            -- 02-embeddings-retrieval/models/two_tower \
+            | awk -F'/' '{print $4}' | sort -u)
+
+          if [ -z "$NOVAS" ]; then
+            echo "Nenhuma versão de modelo nova detectada neste PR." >> "$GITHUB_STEP_SUMMARY"
+            echo "tem_versao=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "tem_versao=true" >> "$GITHUB_OUTPUT"
+            echo "$NOVAS" > /tmp/versoes_novas.txt
+            echo "Versões novas detectadas: $(tr '\n' ' ' < /tmp/versoes_novas.txt)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Comparar cada versão nova contra a produção
+        if: steps.versoes.outputs.tem_versao == 'true'
+        working-directory: 02-embeddings-retrieval/scripts
+        run: |
+          FALHOU=0
+          while read -r versao; do
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "## \`$versao\`" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            if ! python comparar_modelos.py "$versao" >> "$GITHUB_STEP_SUMMARY" 2>&1; then
+              FALHOU=1
+            fi
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          done < /tmp/versoes_novas.txt
+
+          if [ "$FALHOU" = "1" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "⚠️ Pelo menos uma versão ficou pior que a produção atual." >> "$GITHUB_STEP_SUMMARY"
+            # falha o job de propósito — dá um "X" visível na lista de checks
+            # do PR, pra facilitar triar várias contribuições sem abrir cada
+            # uma. Não significa "código quebrado", só "não superou ainda".
+            exit 1
+          fi

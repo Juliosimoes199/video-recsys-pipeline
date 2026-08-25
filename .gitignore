@@ -19,9 +19,11 @@ dist/
 # Jupyter
 .ipynb_checkpoints/
 
-# modelos treinados — grandes e regeneráveis, ver README de cada estágio
-02-embeddings-retrieval/models/two_tower/*/
-!02-embeddings-retrieval/models/two_tower/.gitkeep
+# modelos treinados: versões PROPOSTAS via PR precisam ser commitadas pra
+# o CI conseguir avaliar (ver CONTRIBUTING.md) — só não vale acumular
+# "sujeira" local antes de decidir se vale propor. Se quiser testar
+# localmente sem sujar o git, use um nome de versão temporário e apague
+# a pasta depois (models/two_tower/<versao>/) antes de dar commit.
 
 # dados regeneráveis (grandes, contêm embeddings brutos)
 02-embeddings-retrieval/videos_new.csv
