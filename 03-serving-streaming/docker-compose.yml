@@ -1,0 +1,92 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
+        VITE_API_URL: /api
+    ports:
+      - "3000:80"
+    depends_on:
+      - video-service
+    restart: unless-stopped
+
+  # Seu serviço: banco de dados, HLS, URLs pré-assinadas, notificações e
+  # MediaConvert. Hoje é o stub em video-service/app/main.py — troque a
+  # implementação por dentro sem precisar mexer neste compose.
+  video-service:
+    build: ./video-service
+    ports:
+      - "8000:8000"
+    environment:
+      CLERK_JWKS_URL: ${CLERK_JWKS_URL}
+      CLERK_ISSUER: ${CLERK_ISSUER}
+      CLERK_WEBHOOK_SECRET: ${CLERK_WEBHOOK_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL}
+      S3_PUBLIC_ENDPOINT_URL: ${S3_PUBLIC_ENDPOINT_URL}
+      S3_BUCKET: ${S3_BUCKET}
+      MINIO_WEBHOOK_TOKEN: ${MINIO_WEBHOOK_TOKEN:-dev-webhook-token}
+      # Só usada pelo script scripts/seed_youtube.py (importar catálogo do
+      # YouTube), rodado manualmente via `docker compose exec`. Não é usada
+      # em nenhuma rota da API.
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Postgres: guarda vídeos, comentários, notificações, canais e as views
+  # únicas por usuário. Volume nomeado `pgdata` — sobrevive a
+  # `docker compose stop/start`, restart de container e rebuild de imagem;
+  # só um `docker compose down -v` apaga de propósito.
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tube}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tube}
+      POSTGRES_DB: ${POSTGRES_DB:-tube}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tube} -d ${POSTGRES_DB:-tube}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  # Storage compatível com S3 pra testar URLs pré-assinadas e uploads
+  # localmente, sem precisar de uma conta AWS. Em produção, aponte
+  # S3_ENDPOINT_URL para o S3 de verdade (ou remova este serviço).
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY: http://video-service:8000/webhooks/minio
+      MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_PRIMARY: ${MINIO_WEBHOOK_TOKEN:-dev-webhook-token}
+      MINIO_NOTIFY_WEBHOOK_ENABLE_PRIMARY: "on"
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # console web
+    volumes:
+      - minio-data:/data
+
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  minio-data:

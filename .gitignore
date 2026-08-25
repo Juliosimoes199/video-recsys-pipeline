@@ -1,0 +1,30 @@
+# segredos
+.env
+.env.local
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+.vercel/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# modelos treinados — grandes e regeneráveis, ver README de cada estágio
+02-embeddings-retrieval/models/two_tower/*/
+!02-embeddings-retrieval/models/two_tower/.gitkeep
+
+# dados regeneráveis (grandes, contêm embeddings brutos)
+02-embeddings-retrieval/videos_new.csv
+
+# SO
+.DS_Store

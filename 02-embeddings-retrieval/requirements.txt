@@ -1,0 +1,13 @@
+pandas
+numpy
+scikit-learn
+
+# extração de embeddings (VideoMAE)
+torch
+transformers
+opencv-python
+yt-dlp
+pillow
+
+# modelo de retrieval (two-tower)
+tensorflow

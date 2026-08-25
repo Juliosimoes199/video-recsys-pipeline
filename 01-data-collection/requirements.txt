@@ -1,0 +1,14 @@
+requests
+python-dotenv
+flask
+
+# análise visual (Florence-2) — ver README para notas de instalação
+# (torch/torchvision precisam vir do mesmo índice CPU, e transformers
+# precisa ficar fixo em 4.49.0 por causa do trust_remote_code do Florence-2)
+torch
+torchvision
+transformers==4.49.0
+pillow
+einops
+timm
+accelerate
