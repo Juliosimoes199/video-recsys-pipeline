@@ -80,6 +80,7 @@ python novo.py "seu termo de busca"
 # Estágio 2 — embeddings + retrieval
 cd ../02-embeddings-retrieval && pip install -r requirements.txt
 jupyter notebook notebooks/01_extrair_embeddings_videomae.ipynb
+python scripts/exportar_para_frontend.py  # gera os dados que o Estágio 3 consome
 
 # Estágio 3 — streaming completo (Docker) ou só o feed de recomendação (Vercel)
 cd ../03-serving-streaming && docker compose up --build

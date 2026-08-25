@@ -12,6 +12,7 @@ ranquear vídeos por relevância pra cada usuário.
 | `notebooks/02_treinar_modelo_retrieval.ipynb` | treina o modelo two-tower e salva versões no registro de modelos |
 | `scripts/registry.py` | biblioteca de versionamento de modelo (salvar, listar, carregar) |
 | `scripts/promover_modelo.py` | troca qual versão do modelo está "em produção" |
+| `scripts/exportar_para_frontend.py` | junta `videos.db` (Estágio 1) + `videos_new.csv` (aqui) e gera os arquivos que o Estágio 3 consome |
 | `models/` | modelos treinados, versionados — `registry.json` diz qual está ativa |
 | `videos.csv` | saída do Estágio 1 (entrada deste estágio) |
 
