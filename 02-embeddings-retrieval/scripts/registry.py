@@ -13,6 +13,7 @@ lê "qual é a versão atual" daqui — nunca com um caminho fixo no código.
 
 import json
 import datetime
+import secrets
 from pathlib import Path
 
 MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
@@ -33,8 +34,15 @@ def _salvar_registry(registry):
 
 
 def novo_nome_versao():
-    """Gera um nome de versão único baseado na data/hora, ex: v_2026-08-25_2015"""
-    return "v_" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M")
+    """Gera um nome de versão único, ex: v_2026-08-25_211805_a1b2.
+
+    Inclui segundos + um sufixo aleatório curto pra garantir que duas
+    versões salvas em sequência rápida (ex: re-rodando a célula de treino
+    duas vezes seguidas) nunca colidam e se sobrescrevam por engano.
+    """
+    agora = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    sufixo = secrets.token_hex(2)
+    return f"v_{agora}_{sufixo}"
 
 
 def salvar_versao(user_tower, video_tower, catalog_embeddings, catalog_video_ids, metricas, notas="", versao=None):
