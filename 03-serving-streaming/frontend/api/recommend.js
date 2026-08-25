@@ -27,6 +27,15 @@ function mediaEmbeddings(indices) {
   return media
 }
 
+function embaralhar(array) {
+  const copia = [...array]
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copia[i], copia[j]] = [copia[j], copia[i]]
+  }
+  return copia
+}
+
 export default function handler(req, res) {
   const body = req.method === 'POST' ? (req.body ?? {}) : {}
   const likedIds = Array.isArray(body.likedIds) ? body.likedIds : []
@@ -42,9 +51,11 @@ export default function handler(req, res) {
     .map((id) => catalog.findIndex((v) => v.id === id))
     .filter((i) => i !== -1)
 
-  // sem sinal ainda (feed "descubra"): ordem do catálogo, só pulando o que já apareceu
+  // sem sinal ainda (feed "descubra"): aleatório a cada visita, só pulando
+  // o que já apareceu — sem isso, a ordem do catalog.json é sempre a mesma
+  // e o feed parecia "decorado" toda vez que abria o app de novo
   if (idxCurtidos.length === 0) {
-    const pagina = disponiveis.slice(0, limit).map(({ video }) => ({ ...video, score: null }))
+    const pagina = embaralhar(disponiveis).slice(0, limit).map(({ video }) => ({ ...video, score: null }))
     res.status(200).json({ recomendacoes: pagina })
     return
   }
