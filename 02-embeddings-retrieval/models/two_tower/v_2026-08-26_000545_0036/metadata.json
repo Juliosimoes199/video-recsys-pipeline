@@ -1,0 +1,9 @@
+{
+  "criado_em": "2026-08-26T00:05:45",
+  "metricas": {
+    "train_auc": 0.9894305467605591,
+    "val_auc": 0.4958202838897705,
+    "epochs": 10
+  },
+  "notas": "Dados de interação sintéticos. Overfitting severo (val AUC ~0.50) — ver seção de limitações acima."
+}
