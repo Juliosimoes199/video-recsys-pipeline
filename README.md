@@ -33,7 +33,8 @@ técnicas específicas daquele estágio.
 ## Demo ao vivo
 
 O feed de recomendação (Estágio 2 servindo no Estágio 3) está publicado e
-funcional: **[link do deploy no Vercel]** — curta alguns vídeos e o feed se
+funcional: **[frontend-iota-eight-95.vercel.app](https://frontend-iota-eight-95.vercel.app/)**
+(exige login) — curta alguns vídeos e o feed se
 adapta em tempo real por similaridade de embeddings de vídeo.
 
 ## Destaques técnicos
