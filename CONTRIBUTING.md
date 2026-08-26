@@ -6,8 +6,12 @@ explica os dois fluxos.
 
 ## Configuração local
 
+Só o mantenedor tem permissão de push direto neste repositório — pra
+contribuir, primeiro faça um **fork** (botão "Fork" no topo da página do
+GitHub), depois clone o *seu* fork:
+
 ```bash
-git clone https://github.com/Juliosimoes199/video-recsys-pipeline.git
+git clone https://github.com/<seu-usuario>/video-recsys-pipeline.git
 cd video-recsys-pipeline
 
 # cada estágio tem seu próprio ambiente — instale só o que for mexer
@@ -62,10 +66,16 @@ entender.
 ### 3. Abra o PR incluindo os arquivos da versão
 
 ```bash
+git checkout -b propor-modelo-<sua_versao>
 git add 02-embeddings-retrieval/models/two_tower/<sua_versao>/
 git add 02-embeddings-retrieval/models/registry.json  # se você criou/editou algo aqui manualmente, normalmente não precisa
 git commit -m "Propõe modelo <sua_versao>: <o que você mudou e por quê>"
+git push -u origin propor-modelo-<sua_versao>
 ```
+
+Depois abra a PR do seu fork contra o repositório original — pelo botão
+"Compare & pull request" que aparece no GitHub assim que você dá push, ou
+por `gh pr create` (que detecta o fork automaticamente).
 
 Não precisa (e não deve) chamar `promover_modelo.py` — isso fica pra
 depois de mergear, é uma decisão manual do mantenedor.
